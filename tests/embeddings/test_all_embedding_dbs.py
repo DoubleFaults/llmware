@@ -65,3 +65,11 @@ def generic_embedding_and_query(library, embedding_db):
     # Delete the embedding
     embedding_handler.delete_index(embedding_db=embedding_db, model=model)
     return query_results
+
+def test_redis_embedding_and_query():
+    sample_files_path = Setup().load_sample_files()
+    library = Library().create_new_library("test_embedding_redis")
+    library.add_files(os.path.join(sample_files_path,"SmallLibrary"))
+    results = generic_embedding_and_query(library, "redis")
+    assert len(results) > 0
+    library.delete_library(confirm_delete=True)

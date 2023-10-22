@@ -37,7 +37,7 @@ class EmbeddingHandler:
 
     def __init__(self, library):
         
-        self.supported_embedding_dbs = ["milvus", "faiss", "pinecone", "mongo_atlas"]
+        self.supported_embedding_dbs = ["milvus", "faiss", "pinecone", "mongo_atlas", "redis"]
         self.library = library
    
     # Create a new embedding. 
@@ -94,6 +94,10 @@ class EmbeddingHandler:
 
         if embedding_db == "mongo_atlas": 
             return EmbeddingMongoAtlas(self.library, model)
+        
+        if embedding_db == "redis": 
+            # return EmbeddingRedis(self.library, model)
+            raise NotImplementedError("Redis is not yet supported")
 
     def generate_index_name(self, account_name, library_name, model_name, max_component_length=19):
 
@@ -757,3 +761,17 @@ class EmbeddingMongoAtlas:
     def convert_to_hyphens(self, input_string):
         return input_string.replace("_", "-").replace(" ", "-").lower()
 
+
+class EmbeddingRedis:
+    def __init__(self, library, model=None):
+        self.library = library
+        self.model = model
+        self.model_name = model.model_name
+        self.embedding_dims = model.embedding_dims
+
+        # will leave "-" and "_" in file path, but remove "@" and " "
+        model_safe_path = re.sub("[@ ]", "", self.model_name).lower()
+        self.redis_key = "embedding_redis_" + model_safe_path
+
+        # Connect to redis
+        self.redis_client = redis.Redis(host=LLMWareConfig.get_config("redis_host"), port=LLMWareConfig.get_config("redis_port"))

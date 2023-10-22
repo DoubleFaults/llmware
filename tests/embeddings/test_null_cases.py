@@ -52,4 +52,13 @@ def test_no_blocks_mongo_atlas():
     Logger().log(f"\n  > Query Results: {query_results}")
     assert query_results is not None
    
- 
+def test_no_blocks_redis():
+    library = Library().create_new_library("test_no_blocks_redis")
+
+    embedding_summary = library.install_new_embedding(embedding_model_name="mini-lm-sbert",vector_db="redis")
+    Logger().log(f"\n  > Embedding Summary: {embedding_summary}")
+    assert embedding_summary is not None
+    
+    query_results = Query(library).semantic_query(query="Salary", result_count=3, results_only=True)
+    Logger().log(f"\n  > Query Results: {query_results}")
+    assert query_results is not None
